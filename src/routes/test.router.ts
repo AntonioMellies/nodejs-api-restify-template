@@ -11,8 +11,8 @@ class TestRouter extends Router {
     }
 
     applyRoutes(application: restify.Server) {
-        application.get(`${this.basePath}`, authorize(), TestService.findAll);
-        application.get(`${this.basePath}/:id`, TestService.findAll);
+        application.get(`${this.basePath}`, [authorize(), TestService.findAll]);
+        application.get(`${this.basePath}/:id`, [authorize(), TestService.findAll]);
     }
 }
 
