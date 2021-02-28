@@ -1,3 +1,5 @@
+import { handleError } from './../handlers/error.handler';
+import { tokenParser } from './../utils/token.parse';
 import * as restifi from 'restify'
 import { environment } from '../common/environment';
 import { routes } from './../routes/index';
@@ -15,6 +17,8 @@ export class Server {
                 })
 
                 this.application.use(restifi.plugins.queryParser())
+                this.application.use(restifi.plugins.bodyParser())
+                this.application.use(tokenParser)
 
                 //Routers
                 for (let router of routes) {
@@ -35,6 +39,9 @@ export class Server {
                 this.application.listen(environment.server.port, () => {
                     resolve(this.application);
                 })
+
+                this.application.on('restifyError', handleError)
+
             } catch (error) {
                 reject(error);
             }
