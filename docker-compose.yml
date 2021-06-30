@@ -1,0 +1,19 @@
+version: '3.1'
+
+services:
+  mongodb_nodejs_api_restify_template:
+    image: tutum/mongodb
+    container_name: mongodb_nodejs_api_restify_template
+    restart: always
+    volumes:
+      - nodejs_api_restify_template-mongodb:/data/mongodb
+    ports:
+      - 27017:27017
+      - 28017:28017
+    environment:
+      - MONGODB_USER=user
+      - MONGODB_PASS=secret
+      - MONGODB_DATABASE=nodejs-api-restify-template
+
+volumes:
+    nodejs_api_restify_template-mongodb:

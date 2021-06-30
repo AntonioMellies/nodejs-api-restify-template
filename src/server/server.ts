@@ -1,8 +1,9 @@
+import { environment } from './../common/environment';
 import { handleError } from './../handlers/error.handler';
 import { tokenParser } from './../utils/token.parse';
 import * as restifi from 'restify'
-import { environment } from '../common/environment';
 import { routes } from './../routes/index';
+import * as mongoose from 'mongoose';
 
 export class Server {
 
@@ -15,6 +16,16 @@ export class Server {
                     name: 'api-template',
                     version: '1.0.0'
                 })
+
+                // DataBase
+                mongoose.connect(environment.db.url, {
+                    useNewUrlParser: true,
+                    useUnifiedTopology: true
+                }).catch(
+                    (err) => {
+                        console.error(err)
+                    }
+                )
 
                 this.application.use(restifi.plugins.queryParser())
                 this.application.use(restifi.plugins.bodyParser())
