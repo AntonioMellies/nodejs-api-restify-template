@@ -2,7 +2,7 @@ import * as mongoose from 'mongoose';
 import * as restify from 'restify'
 import { NotFoundError } from 'restify-errors'
 
-export class BaseService<D extends mongoose.Document> {
+export class ModelService<D extends mongoose.Document> {
 
     constructor(protected model: mongoose.Model<D>) {
     }
@@ -42,10 +42,16 @@ export class BaseService<D extends mongoose.Document> {
         return next()
     }
 
+    envelope = (document: any): any => {
+        let resource = Object.assign({ _links: {} }, document.toJSON())
+        resource._links.self = `/${this.model.collection.name}/${document._id}`
+        return resource
+    }
+
     render = (response: restify.Response, next: restify.Next) => {
         return (document) => {
             if (document) {
-                response.json(document)
+                response.json(this.envelope(document))
             } else {
                 throw new NotFoundError('Documento não encontrado')
             }
@@ -56,6 +62,9 @@ export class BaseService<D extends mongoose.Document> {
     renderAll = (response: restify.Response, next: restify.Next) => {
         return (documents: any[]) => {
             if (documents) {
+                documents.forEach((document, index, array) => {
+                    array[index] = this.envelope(document);
+                });
                 response.json(documents)
             } else {
                 response.json([])

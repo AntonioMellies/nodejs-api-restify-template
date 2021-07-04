@@ -1,8 +1,8 @@
 import * as restify from 'restify'
-import { BaseService } from '../common/baseService';
+import { ModelService } from '../common/model.service';
 import { User } from './../models/user.model';
 
-class UserService extends BaseService<User> {
+class UserService extends ModelService<User> {
 
     constructor() {
         super(User);

@@ -10,11 +10,11 @@ class UserRouter extends Router {
     }
 
     applyRoutes(application: restify.Server) {
-        application.get(`${this.basePath}`, [UserService.findAll]);
-        application.get(`${this.basePath}/:id`, [UserService.validateId, UserService.findById]);
-        application.post(`${this.basePath}`, [UserService.save]);
-        application.patch(`${this.basePath}/:id`, [UserService.validateId, UserService.updateById]);
-        application.del(`${this.basePath}/:id`, [UserService.validateId, UserService.inactiveUser]);
+        application.get({ path: `${this.basePath}`, version: '1.0.0' }, [UserService.findAll]);
+        application.get({ path: `${this.basePath}/:id`, version: '1.0.0' }, [UserService.validateId, UserService.findById]);
+        application.post({ path: `${this.basePath}`, version: '1.0.0' }, [UserService.save]);
+        application.patch({ path: `${this.basePath}/:id`, version: '1.0.0' }, [UserService.validateId, UserService.updateById]);
+        application.del({ path: `${this.basePath}/:id`, version: '1.0.0' }, [UserService.validateId, UserService.inactiveUser]);
     }
 
 }
