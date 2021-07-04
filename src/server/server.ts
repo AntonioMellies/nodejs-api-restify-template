@@ -1,3 +1,4 @@
+import { mergePatchBodyParser } from './merge-patch.parser';
 import { environment } from './../common/environment';
 import { handleError } from './../handlers/error.handler';
 import { tokenParser } from './../utils/token.parse';
@@ -20,7 +21,9 @@ export class Server {
                 // DataBase
                 mongoose.connect(environment.db.url, {
                     useNewUrlParser: true,
-                    useUnifiedTopology: true
+                    useUnifiedTopology: true,
+                    useCreateIndex: true,
+                    useFindAndModify: false
                 }).catch(
                     (err) => {
                         console.error(err)
@@ -29,6 +32,7 @@ export class Server {
 
                 this.application.use(restifi.plugins.queryParser())
                 this.application.use(restifi.plugins.bodyParser())
+                this.application.use(mergePatchBodyParser)
                 this.application.use(tokenParser)
 
                 //Routers

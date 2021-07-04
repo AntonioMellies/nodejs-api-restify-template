@@ -1,17 +1,60 @@
 import * as mongoose from 'mongoose';
+import * as restfy from 'restify'
+import { hashPassword } from '../utils/password.utils';
 
-const userSchema = new mongoose.Schema({
+export interface User extends mongoose.Document {
+    name: string;
+    email: string;
+    password: string;
+    userType: string;
+    active: boolean;
+}
+
+const userSchema = new mongoose.Schema<User>({
     name: {
-        type: String
+        type: String,
+        require: true
     },
     email: {
         type: String,
-        unique: true
+        unique: true,
+        require: true
     },
     password: {
         type: String,
-        select: false
+        select: false,
+        require: true
+    },
+    userType: {
+        type: String,
+        enum: ['user', 'admin'],
+        default: 'user'
+    },
+    active: {
+        type: Boolean,
+        default: true
     }
 })
 
-export const User = mongoose.model('User', userSchema)
+const saveMiddleware = function (next: restfy.Next) {
+    const user: User = this
+    if (!user.isModified('password')) {
+        next();
+    } else {
+        hashPassword(user, next);
+    }
+}
+
+const updateMiddleware = function (next: restfy.Next) {
+    if (!this.getUpdate()['password']) {
+        next();
+    } else {
+        hashPassword(this.getUpdate(), next);
+    }
+}
+
+userSchema.pre('save', saveMiddleware)
+userSchema.pre('update', updateMiddleware)
+userSchema.pre('findOneAndUpdate', updateMiddleware)
+
+export const User = mongoose.model<User>('User', userSchema)

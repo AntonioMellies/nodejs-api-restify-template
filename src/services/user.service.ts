@@ -1,24 +1,19 @@
+import * as restify from 'restify'
+import { BaseService } from '../common/baseService';
 import { User } from './../models/user.model';
 
-class UserService {
+class UserService extends BaseService<User> {
 
-    findAll(req, resp, next) {
-        User.find().then(users => {
-            resp.json(users)
-            return next();
-        })
+    constructor() {
+        super(User);
     }
 
-    findById(req, resp, next) {
-        const id = req.params.id
-        User.findById(id).then(user => {
-            if (user) {
-                resp.json(user)
-                return next();
-            }
-            resp.send(404)
-            return next();
-        })
+    inactiveUser = (req: restify.Request, resp: restify.Response, next: restify.Next) => {
+        const id = req.params.id;
+        const options = { new: true };
+        User.findByIdAndUpdate(id, { active: false }, options)
+            .then(super.render(resp, next))
+            .catch(next);
     }
 
 }
