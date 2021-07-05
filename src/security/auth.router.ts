@@ -1,6 +1,6 @@
 import * as restify from 'restify'
 import { Router } from '../common/router'
-import AuthService from '../services/auth.service';
+import AuthService from './auth.service';
 
 
 class AuthRouter extends Router {

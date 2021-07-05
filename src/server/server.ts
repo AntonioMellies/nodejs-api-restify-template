@@ -1,5 +1,5 @@
 import { mergePatchBodyParser } from './merge-patch.parser';
-import { environment } from './../common/environment';
+import { environment } from './environment';
 import { handleError } from './../handlers/error.handler';
 import { tokenParser } from './../utils/token.parse';
 import * as restifi from 'restify'
@@ -67,4 +67,10 @@ export class Server {
         return this.initServer().then(() => this)
     }
 
+    shutdown() {
+        return mongoose.disconnect()
+            .then(() => {
+                this.application.close()
+            })
+    }
 }

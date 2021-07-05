@@ -1,6 +1,6 @@
 import * as restify from 'restify'
 import * as jwt from 'jsonwebtoken'
-import { environment } from '../common/environment'
+import { environment } from '../server/environment'
 
 export const tokenParser: restify.RequestHandler = (req, resp, next) => {
     const token = extractToken(req)

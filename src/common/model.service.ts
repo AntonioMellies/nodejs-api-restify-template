@@ -4,13 +4,27 @@ import { NotFoundError } from 'restify-errors'
 
 export class ModelService<D extends mongoose.Document> {
 
+    pageSize = 10;
+
     constructor(protected model: mongoose.Model<D>) {
     }
 
     findAll = (req: restify.Request, resp: restify.Response, next: restify.Next) => {
-        this.model.find()
-            .then(this.renderAll(resp, next))
-            .catch(next);
+        let _page = parseInt(req.query._page || 1)
+        let _pageSize = parseInt(req.query._pageSize || this.pageSize)
+
+        _page = _page > 0 ? _page : 1
+        _pageSize = _pageSize > 0 ? _pageSize : this.pageSize
+
+        const skip = (_page - 1) * _pageSize
+
+        this.model.count({}).exec()
+            .then(count => {
+                this.model.find()
+                    .skip(skip)
+                    .limit(_pageSize)
+                    .then(this.renderAll(resp, next, { page: _page, count, pageSize: _pageSize, url: req.url }))
+            }).catch(next);
     }
 
     findById = (req: restify.Request, resp: restify.Response, next: restify.Next) => {
@@ -23,7 +37,7 @@ export class ModelService<D extends mongoose.Document> {
     save = (req: restify.Request, resp: restify.Response, next: restify.Next) => {
         let document = new this.model(req.body);
         document.save()
-            .then(this.render(resp, next))
+            .then(this.render(resp, next, { status: 201 }))
             .catch(next);
     }
 
@@ -48,9 +62,36 @@ export class ModelService<D extends mongoose.Document> {
         return resource
     }
 
-    render = (response: restify.Response, next: restify.Next) => {
+    envelopeAll = (documents: any[], options: any = {}): any => {
+        let resource: any = {
+            _links: {
+                self: `${options.url}`,
+            },
+            items: documents
+        }
+        if (options.page && options.count && options.pageSize) {
+            const remaining = options.count - (options.page * options.pageSize)
+            if (remaining > 0) {
+                resource._links.next = `/${this.model.collection.name}?_page=${options.page + 1}&_pageSize=${options.pageSize}`
+            }
+
+            if (options.page > 1) {
+                resource._links.previous = `/${this.model.collection.name}?_page=${options.page - 1}&_pageSize=${options.pageSize}`
+            }
+        }
+        return resource
+    }
+
+
+    render = (response: restify.Response, next: restify.Next, options: any = {}) => {
         return (document) => {
             if (document) {
+                if (options.status) {
+                    response.status(options.status)
+                }
+                if (document.password) {
+                    document.password = undefined
+                }
                 response.json(this.envelope(document))
             } else {
                 throw new NotFoundError('Documento não encontrado')
@@ -59,15 +100,15 @@ export class ModelService<D extends mongoose.Document> {
         }
     }
 
-    renderAll = (response: restify.Response, next: restify.Next) => {
+    renderAll = (response: restify.Response, next: restify.Next, options: any = {}) => {
         return (documents: any[]) => {
             if (documents) {
                 documents.forEach((document, index, array) => {
                     array[index] = this.envelope(document);
                 });
-                response.json(documents)
+                response.json(this.envelopeAll(documents, options))
             } else {
-                response.json([])
+                response.json(this.envelopeAll([], options))
             }
             return next()
         }

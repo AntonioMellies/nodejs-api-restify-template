@@ -1,3 +1,4 @@
+import { matchPassword } from './../utils/password.utils';
 import * as mongoose from 'mongoose';
 import * as restfy from 'restify'
 import { hashPassword } from '../utils/password.utils';
@@ -8,6 +9,7 @@ export interface User extends mongoose.Document {
     password: string;
     userType: string;
     active: boolean;
+    matchPassword(password: string): boolean;
 }
 
 const userSchema = new mongoose.Schema<User>({
@@ -35,6 +37,10 @@ const userSchema = new mongoose.Schema<User>({
         default: true
     }
 })
+
+userSchema.methods.matchPassword = function (password: string): boolean {
+    return matchPassword(password, this.password)
+}
 
 const saveMiddleware = function (next: restfy.Next) {
     const user: User = this
