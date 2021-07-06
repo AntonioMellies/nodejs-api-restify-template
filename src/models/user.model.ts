@@ -7,9 +7,10 @@ export interface User extends mongoose.Document {
     name: string;
     email: string;
     password: string;
-    userType: string;
+    profiles: string;
     active: boolean;
     matchPassword(password: string): boolean;
+    hasAny(...profiles: string[]): boolean;
 }
 
 const userSchema = new mongoose.Schema<User>({
@@ -27,10 +28,8 @@ const userSchema = new mongoose.Schema<User>({
         select: false,
         require: true
     },
-    userType: {
-        type: String,
-        enum: ['user', 'admin'],
-        default: 'user'
+    profiles: {
+        type: [String]
     },
     active: {
         type: Boolean,
@@ -40,6 +39,10 @@ const userSchema = new mongoose.Schema<User>({
 
 userSchema.methods.matchPassword = function (password: string): boolean {
     return matchPassword(password, this.password)
+}
+
+userSchema.methods.hasAny = function (...profiles: string[]): boolean {
+    return profiles.some(profile => this.profiles.indexOf(profile) !== -1)
 }
 
 const saveMiddleware = function (next: restfy.Next) {

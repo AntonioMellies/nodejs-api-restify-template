@@ -1,5 +1,4 @@
 import { User } from './../models/user.model';
-import * as restify from 'restify';
 import * as jwt from 'jsonwebtoken';
 import { NotAuthorizedError } from 'restify-errors';
 import { environment } from '../server/environment';

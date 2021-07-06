@@ -1,3 +1,4 @@
+import { User } from '../models/user.model';
 import * as restify from 'restify'
 import * as jwt from 'jsonwebtoken'
 import { environment } from '../server/environment'
@@ -27,8 +28,13 @@ function extractToken(req: restify.Request) {
 function applyBearer(req: restify.Request, next): (error, decoded) => void {
     return (error, decoded) => {
         if (decoded) {
-            req.authenticated = decoded.sub //Associar o login no request  
-            next()
+            User.findOne({ email: decoded.sub })
+                .then(user => {
+                    if (user) {
+                        req.authenticated = user //Associar o login no request  
+                    }
+                    next()
+                }).catch(next)
         } else {
             next()
         }

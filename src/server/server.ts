@@ -1,7 +1,7 @@
 import { mergePatchBodyParser } from './merge-patch.parser';
 import { environment } from './environment';
 import { handleError } from './../handlers/error.handler';
-import { tokenParser } from './../utils/token.parse';
+import { tokenParser } from '../security/token.parse';
 import * as restifi from 'restify'
 import { routes } from './../routes/index';
 import * as mongoose from 'mongoose';
