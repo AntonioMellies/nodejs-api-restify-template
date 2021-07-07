@@ -10,3 +10,13 @@ export const authorize: (...profiles: string[]) => restify.RequestHandler = (...
         }
     }
 }
+
+export const authorizeUserID: () => restify.RequestHandler = () => {
+    return (req, resp, next) => {
+        if (req.authenticated['_id'] == req.params.id) {
+            next()
+        } else {
+            next(new ForbiddenError('Permission denied - User divergence'))
+        }
+    }
+}

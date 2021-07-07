@@ -1,3 +1,4 @@
+import { authorizeUserID } from './../security/authz.handler';
 import * as restify from 'restify'
 import { Router } from '../common/router'
 import { authorize } from '../security/authz.handler';
@@ -14,8 +15,8 @@ class UserRouter extends Router {
         application.get({ path: `${this.basePath}`, version: '1.0.0' }, [authorize('admin'), UserService.findAll]);
         application.get({ path: `${this.basePath}/:id`, version: '1.0.0' }, [authorize('admin'), UserService.validateId, UserService.findById]);
         application.post({ path: `${this.basePath}`, version: '1.0.0' }, [authorize('admin', 'user'), UserService.save]);
-        application.patch({ path: `${this.basePath}/:id`, version: '1.0.0' }, [authorize('user'), UserService.validateId, UserService.updateById]);
-        application.del({ path: `${this.basePath}/:id`, version: '1.0.0' }, [authorize('user'), UserService.validateId, UserService.inactiveUser]);
+        application.patch({ path: `${this.basePath}/:id`, version: '1.0.0' }, [authorize('admin', 'user'), authorizeUserID(), UserService.validateId, UserService.updateById]);
+        application.del({ path: `${this.basePath}/:id`, version: '1.0.0' }, [authorize('admin'), UserService.validateId, UserService.inactiveUser]);
     }
 
 }
