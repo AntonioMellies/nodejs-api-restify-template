@@ -3,6 +3,8 @@ import { environment } from './environment';
 import { handleError } from './../handlers/error.handler';
 import { tokenParser } from '../security/token.parse';
 import * as restifi from 'restify'
+import * as corsMiddleware from 'restify-cors-middleware2'
+
 import { routes } from './../routes/index';
 import * as mongoose from 'mongoose';
 
@@ -29,6 +31,19 @@ export class Server {
                         console.error(err)
                     }
                 )
+
+                // CORS Configurations
+                const corsOptions: corsMiddleware.Options = {
+                    preflightMaxAge: 10,
+                    origins: ['*'],
+                    allowHeaders: ['authorization'],
+                    exposeHeaders: ['x-custom-header']
+                }
+
+                const cors: corsMiddleware.CorsMiddleware = corsMiddleware(corsOptions)
+
+                this.application.pre(cors.preflight)
+                this.application.use(cors.actual)
 
                 this.application.use(restifi.plugins.queryParser())
                 this.application.use(restifi.plugins.bodyParser())
